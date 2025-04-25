@@ -19,7 +19,8 @@ fuente_arial = pygame.font.SysFont("arial", 30, 1, 1)
 
 vidas = 3
 
-x_casa
+
+
 
 class Gallina(pygame.sprite.Sprite):
     def __init__(self):
@@ -55,7 +56,7 @@ class Gallina(pygame.sprite.Sprite):
 class Carro(pygame.sprite.Sprite):
     def __init__(self, x, y, velocidad):
         super().__init__()
-        self.image = pygame.Surface((40, 40)) 
+        self.image = pygame.Surface((30, 30)) 
         self.image.fill(rojo)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -68,9 +69,7 @@ class Carro(pygame.sprite.Sprite):
         elif self.velocidad < 0 and self.rect.right < 0:
             self.rect.left = 1000
 
-class Casas(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
+
 
 # Crear instancias
 gallina = Gallina()
@@ -79,19 +78,19 @@ sprites_car = pygame.sprite.Group()
 
 def y_en_carretera(superior=True):
     if superior:
-        return random.randint(250, 250 + 80 - 40)
+        return random.choice([250, 290])
     else:
-        return random.randint(390, 390 + 80 - 40)
+        return random.choice([390, 430])
 
 for i in range(10):
     x = random.randint(100, 1000)
     y = y_en_carretera(True)
-    vel = -random.randint(3, 6)
+    vel = -6
     sprites_car.add(Carro(x, y, vel))
 
     x = random.randint(0, 900)
     y = y_en_carretera(False)
-    vel = random.randint(3, 6)
+    vel = 6
     sprites_car.add(Carro(x, y, vel))
 
 # Bucle principal
@@ -113,24 +112,21 @@ while True:
     pygame.draw.rect(ventana, color_anden, (0, 200, 1000, 50))
     pygame.draw.rect(ventana, color_anden, (0, 470, 1000, 50))
 
-    # Casa
-
-    pygame.draw.rect(ventana, rojo, (50,600,70,50))
-    pygame.draw.rect(ventana, rojo, (10,5,70,50))
-
-
-
-    
+    # Casas
+    pygame.draw.rect(ventana, rojo, (0, 5, 70, 50))
+    pygame.draw.rect(ventana, rojo, (500, 10, 70, 50))
+    pygame.draw.rect(ventana, rojo, (60, 600, 70, 50))
+    pygame.draw.rect(ventana, rojo, (500, 625, 70, 50))
+    pygame.draw.rect(ventana, rojo, (600, 600, 70, 50))
+ 
     ventana.blit(fuente_arial.render(f"Vidas = {vidas}", True, blanco), (850, 25))
 
-    
     sprites.update()
     gallina.puntos()
     sprites.draw(ventana)
 
     sprites_car.update()
     sprites_car.draw(ventana)
-
     
     if pygame.sprite.spritecollideany(gallina, sprites_car):
         vidas -= 1
