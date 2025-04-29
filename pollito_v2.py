@@ -3,6 +3,7 @@ import sys
 import random
 
 pygame.init()
+pygame.mixer.init()
 
 ventana = pygame.display.set_mode((1000, 700))
 pygame.display.set_caption("¡Corre pollito!")
@@ -14,6 +15,7 @@ rojo = (255, 0, 0)
 blanco = (255, 255, 255)
 color_anden = (122, 128, 122)
 
+# Cargar imágenes
 carro_azul = pygame.image.load("img/carro_azul.png")
 carro_azul = pygame.transform.scale(carro_azul, (30, 30))
 carro_gris = pygame.image.load("img/Carro_gris.png")
@@ -26,14 +28,16 @@ carro_rojo = pygame.image.load("img/carro_rojo.png")
 carro_rojo = pygame.transform.scale(carro_rojo, (40, 40))
 casa = pygame.image.load("img/casa.png")
 casa = pygame.transform.scale(casa, (70, 70))
+pygame.mixer.music.load("sounds/autopista.ogg")
+pygame.mixer.music.set_volume(0.6)
+pygame.mixer.music.play(-1, 0.5)
+son_pollo = pygame.mixer.Sound("sounds/pollo.ogg")
+choque = pygame.mixer.Sound("sounds/choque.ogg")
 
 reloj = pygame.time.Clock()
 fuente_arial = pygame.font.SysFont("arial", 30, 1, 1)
 
 vidas = 3
-
-
-
 
 class Gallina(pygame.sprite.Sprite):
     def __init__(self):
@@ -43,17 +47,35 @@ class Gallina(pygame.sprite.Sprite):
         self.rect.topleft = (460, 480)
         self.pun = 0
         self.zona_segura = False
+        self.ultimo_sonido = 0 
 
     def update(self):
         teclas = pygame.key.get_pressed()
+        tiempo_actual = pygame.time.get_ticks()
+
         if teclas[pygame.K_RIGHT]:
             self.rect.x += 5
+            if tiempo_actual - self.ultimo_sonido > 200:
+                son_pollo.play()
+                self.ultimo_sonido = tiempo_actual
+
         if teclas[pygame.K_LEFT]:
             self.rect.x -= 5
+            if tiempo_actual - self.ultimo_sonido > 200:
+                son_pollo.play()
+                self.ultimo_sonido = tiempo_actual
+
         if teclas[pygame.K_UP]:
             self.rect.y -= 5
+            if tiempo_actual - self.ultimo_sonido > 200:
+                son_pollo.play()
+                self.ultimo_sonido = tiempo_actual
+
         if teclas[pygame.K_DOWN]:
             self.rect.y += 5
+            if tiempo_actual - self.ultimo_sonido > 200:
+                son_pollo.play()
+                self.ultimo_sonido = tiempo_actual
 
         if self.rect.y < 200 and not self.zona_segura:
             self.pun += 1
@@ -79,8 +101,6 @@ class Carro(pygame.sprite.Sprite):
             self.rect.right = 0
         elif self.velocidad < 0 and self.rect.right < 0:
             self.rect.left = 1000
-
-
 
 # Crear instancias
 gallina = Gallina()
@@ -115,8 +135,6 @@ while True:
 
     ventana.fill(verde)
 
-    
-
     # Dibujar pistas y andenes
     pygame.draw.rect(ventana, gris, (0, 250, 1000, 80))
     pygame.draw.rect(ventana, gris, (0, 390, 1000, 80))
@@ -125,10 +143,10 @@ while True:
 
     # Casas
     ventana.blit(casa, (0, 5))
-    pygame.draw.rect(ventana, rojo, (500, 10, 70, 50))
-    pygame.draw.rect(ventana, rojo, (60, 600, 70, 50))
-    pygame.draw.rect(ventana, rojo, (500, 625, 70, 50))
-    pygame.draw.rect(ventana, rojo, (600, 600, 70, 50))
+    ventana.blit(casa, (500, 10))
+    ventana.blit(casa, (60, 600))
+    ventana.blit(casa, (500, 625))
+    ventana.blit(casa, (600, 600))
  
     ventana.blit(fuente_arial.render(f"Vidas = {vidas}", True, blanco), (850, 25))
 
@@ -141,12 +159,14 @@ while True:
     
     if pygame.sprite.spritecollideany(gallina, sprites_car):
         vidas -= 1
-        gallina.rect.topleft = (460, 480)
+        choque.play()
+        gallina.rect.topleft = (460, 470)
 
     if vidas <= 0:
         ventana.blit(fuente_arial.render("GAME OVER", True, blanco), (450, 325))
         pygame.display.flip()
         pygame.time.delay(2000)
+        pygame.mixer.music.stop()
         pygame.quit()
         sys.exit()
 
